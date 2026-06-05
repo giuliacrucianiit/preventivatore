@@ -97,20 +97,23 @@ def _leggi_foglio(ws, nome_sorgente: str, nome_foglio: str) -> list[dict]:
     return [v for v in voci if v["descrizione"].strip()]
 
 def _rileva_colonne(ws) -> dict:
-    col = {"codice": 0, "descrizione": 1, "prezzo": 2, "um": 3}
+    # Default: A=codice, B=descrizione, C=um, D=prezzo
+    col = {"codice": 0, "descrizione": 1, "um": 2, "prezzo": 3}
     kw = {
-        "codice": ["codice","cod.","numero d'ordine","numero","n.","articolo"],
-        "descrizione": ["descrizione dell'articolo","descrizione","desc.","lavorazione","voce"],
-        "prezzo": ["prezzo €","prezzo","importo","€"],
-        "um": ["u.m.","um","unità","misura"],
+        "codice":      ["numero d'ordine", "numero", "codice", "cod.", "n."],
+        "descrizione": ["descrizione dell'articolo", "descrizione", "lavorazione", "voce"],
+        "um":          ["u.m.", "um", "unità", "misura"],
+        "prezzo":      ["prezzo €", "prezzo", "importo"],
     }
+    trovati = {}
     for row in ws.iter_rows(min_row=1, max_row=5):
         for cell in row:
             if not cell.value: continue
-            v = str(cell.value).strip().lower().replace("\n"," ")
+            v = str(cell.value).strip().lower().replace("\n", " ").replace("\r", " ")
             for campo, keys in kw.items():
-                if any(k in v for k in keys):
-                    col[campo] = cell.column - 1
+                if campo not in trovati and any(k in v for k in keys):
+                    trovati[campo] = cell.column - 1
+    col.update(trovati)
     return col
 
 def _cell(row, idx):
