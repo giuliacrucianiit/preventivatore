@@ -61,40 +61,40 @@ def carica_prezziario() -> list[dict]:
 
 def _leggi_foglio(ws, nome_sorgente: str, nome_foglio: str) -> list[dict]:
     col = _rileva_colonne(ws)
-    skip = {"numero d'ordine","codice","cod.","n.",
-            "descrizione dell'articolo","descrizione","voce","lavorazione",
-            "u.m.","um","prezzo","prezzo €"}
     voci = []
-    corrente = None
+
     for row in ws.iter_rows(values_only=True):
-        if not row or all(v is None for v in row): continue
+        if not row or all(v is None for v in row):
+            continue
+
         codice = _cell(row, col["codice"])
         desc   = _cell(row, col["descrizione"])
         um     = _cell(row, col["um"])
-        # parse prezzo dalla cella raw
+
         raw = row[col["prezzo"]] if col["prezzo"] < len(row) else None
         if raw is None: prezzo = 0.0
         elif isinstance(raw, (int, float)): prezzo = float(raw)
         else: prezzo = _parse_prezzo(str(raw))
-        if codice.lower() in skip or desc.lower() in skip: continue
-        ha_cod = bool(codice); ha_desc = bool(desc)
-        ha_p = prezzo > 0;     ha_um = bool(um)
-        if ha_cod and ha_desc:
-            if corrente: voci.append(corrente)
-            corrente = {"codice":codice,"descrizione":desc,"prezzo":prezzo,
-                        "um":um or "","sorgente":nome_sorgente,"foglio":nome_foglio}
-        elif ha_cod and not ha_desc:
-            if corrente: voci.append(corrente)
-            corrente = None
-        elif not ha_cod and ha_desc and corrente:
-            corrente["descrizione"] += " " + desc
-            if ha_p and corrente["prezzo"]==0: corrente["prezzo"] = prezzo
-            if ha_um and not corrente["um"]: corrente["um"] = um
-        elif not ha_cod and not ha_desc and corrente:
-            if ha_p and corrente["prezzo"]==0: corrente["prezzo"] = prezzo
-            if ha_um and not corrente["um"]: corrente["um"] = um
-    if corrente: voci.append(corrente)
-    return [v for v in voci if v["descrizione"].strip()]
+
+        # Salta intestazioni
+        if desc.lower() in ("descrizione dell'articolo","descrizione","voce","lavorazione"):
+            continue
+        if codice.lower() in ("numero d'ordine","codice","cod.","n.","numero"):
+            continue
+        # Salta righe senza descrizione
+        if not desc:
+            continue
+
+        voci.append({
+            "codice": codice,
+            "descrizione": desc,
+            "prezzo": prezzo,
+            "um": um,
+            "sorgente": nome_sorgente,
+            "foglio": nome_foglio,
+        })
+
+    return voci
 
 def _rileva_colonne(ws) -> dict:
     # Default: A=codice, B=descrizione, C=um, D=prezzo
