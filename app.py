@@ -26,6 +26,13 @@ IMPOSTAZIONI_DEFAULT = {
 app = Flask(__name__)
 _voci_cache: list[dict] = []
 
+# Svuota cache all'avvio (necessario dopo ogni redeploy)
+import glob
+for f in glob.glob(str(DATA / "*.json")):
+    if "cache" in f:
+        try: os.remove(f)
+        except: pass
+
 def carica_prezziario() -> list[dict]:
     global _voci_cache
     if _voci_cache:
