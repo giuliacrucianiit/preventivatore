@@ -58,24 +58,28 @@
 
   /* Tabella prezziario — come il desktop */
   .scroll-prezziario { flex: 1; overflow-y: auto; overflow-x: hidden; }
-  .tbl { width: 100%; border-collapse: collapse; }
+  .tbl { width: 100%; border-collapse: collapse; table-layout: fixed; }
   .tbl thead th {
     background: #f0f0f0; color: #444; font-size: 12px; font-weight: 600;
     padding: 7px 8px; text-align: left; border-bottom: 2px solid #ccc;
-    position: sticky; top: 0; z-index: 2;
+    position: sticky; top: 0; z-index: 2; overflow: hidden;
   }
-  .tbl thead th.r { text-align: right; }
+  .tbl thead th.cod { width: 90px; }
+  .tbl thead th.um  { width: 55px; }
+  .tbl thead th.pr  { width: 85px; text-align: right; }
+  .tbl thead th.az  { width: 80px; }
+  .tbl thead th.desc { }
   .tbl tbody tr { border-bottom: 1px solid #efefef; cursor: pointer; }
   .tbl tbody tr:nth-child(even) { background: #fafafa; }
   .tbl tbody tr:hover { background: var(--blu-ch); }
-  .tbl td { padding: 6px 8px; font-size: 12px; vertical-align: top; }
-  .tbl td.cod { font-family: monospace; font-size: 11px; color: #888; white-space: nowrap; width: 80px; }
-  .tbl td.desc { line-height: 1.45; word-break: break-word; }
-  .tbl td.um { white-space: nowrap; color: #888; font-size: 11px; width: 50px; }
-  .tbl td.pr { text-align: right; white-space: nowrap; font-weight: 600; width: 80px; }
-  .tbl td.az { width: 70px; text-align: center; }
+  .tbl td { padding: 6px 8px; font-size: 12px; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
+  .tbl td.cod { font-family: monospace; font-size: 11px; color: #888; width: 90px; }
+  .tbl td.desc { line-height: 1.45; white-space: normal; }
+  .tbl td.um { color: #888; font-size: 11px; width: 55px; }
+  .tbl td.pr { text-align: right; font-weight: 600; width: 85px; }
+  .tbl td.az { width: 80px; text-align: center; }
   .btn-add { background: var(--blu); color: white; border: none;
-    border-radius: 4px; padding: 3px 8px; font-size: 11px; cursor: pointer; }
+    border-radius: 4px; padding: 3px 8px; font-size: 11px; cursor: pointer; white-space: nowrap; }
   .btn-add:hover { background: var(--blu-sc); }
   .sx-footer { padding: 8px 14px; border-top: 1px solid var(--bordo);
     display: flex; align-items: center; justify-content: space-between;
@@ -207,11 +211,11 @@
       <table class="tbl">
         <thead>
           <tr>
-            <th>Codice</th>
-            <th>Descrizione dell'articolo</th>
-            <th>U.M.</th>
-            <th class="r">Prezzo €</th>
-            <th></th>
+            <th class="cod">Codice</th>
+            <th class="desc">Descrizione dell'articolo</th>
+            <th class="um">U.M.</th>
+            <th class="pr">Prezzo €</th>
+            <th class="az"></th>
           </tr>
         </thead>
         <tbody id="tbodyPrezziario">
