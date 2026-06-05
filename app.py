@@ -73,15 +73,15 @@ def carica_prezziario() -> list[dict]:
 def _rileva_colonne(ws) -> dict:
     col = {"codice": 0, "descrizione": 1, "prezzo": 2, "um": 3}
     kw = {
-        "codice": ["codice","cod.","numero","articolo"],
-        "descrizione": ["descrizione","desc.","lavorazione","voce"],
-        "prezzo": ["prezzo","importo","€","costo"],
+        "codice": ["codice","cod.","numero d'ordine","numero","n.","articolo"],
+        "descrizione": ["descrizione dell'articolo","descrizione","desc.","lavorazione","voce"],
+        "prezzo": ["prezzo €","prezzo","importo","€"],
         "um": ["u.m.","um","unità","misura"],
     }
     for row in ws.iter_rows(min_row=1, max_row=5):
         for cell in row:
             if not cell.value: continue
-            v = str(cell.value).strip().lower()
+            v = str(cell.value).strip().lower().replace("\n"," ")
             for campo, keys in kw.items():
                 if any(k in v for k in keys):
                     col[campo] = cell.column - 1
@@ -183,7 +183,7 @@ def genera_pdf(doc: dict, impostazioni: dict) -> bytes:
             p(fmt(r["prezzo_unitario"]), 9, align=TA_RIGHT),
             p(fmt(tot), 9, True, align=TA_RIGHT),
         ])
-    cw = [W*0.10, W*0.40, W*0.06, W*0.09, W*0.17, W*0.18]
+    cw = [W*0.14, W*0.38, W*0.06, W*0.08, W*0.17, W*0.17]
     tv = Table(dati, colWidths=cw, repeatRows=1)
     stile = [
         ("BACKGROUND",(0,0),(-1,0),colors.HexColor("#1a1a2e")),
