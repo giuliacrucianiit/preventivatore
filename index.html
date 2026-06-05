@@ -309,17 +309,7 @@
 
     <div class="footer-doc">
       <div class="totali">
-        <div class="iva-sel">
-          <span>IVA:</span>
-          <select id="ivaSelect" onchange="stato.iva=+this.value;aggiornaTotali()">
-            <option value="0">0%</option>
-            <option value="4">4%</option>
-            <option value="10">10%</option>
-            <option value="22" selected>22%</option>
-          </select>
-        </div>
-        <div class="tot-row"><span>Imponibile</span><span id="totImponibile">€ 0,00</span></div>
-        <div class="tot-row"><span id="totIvaLabel">IVA 22%</span><span id="totIva">€ 0,00</span></div>
+  
         <div class="tot-row finale"><span>TOTALE</span><span id="totFinale">€ 0,00</span></div>
       </div>
       <div class="note-input">
@@ -557,8 +547,7 @@ function aggiornaTotali() {
   const imp = stato.righe.reduce((s,r) => s + r.quantita * r.prezzo_unitario, 0);
   const iva = imp * stato.iva / 100;
   document.getElementById("totImponibile").textContent = fmt(imp);
-  document.getElementById("totIvaLabel").textContent = `IVA ${stato.iva}%`;
-  document.getElementById("totIva").textContent = fmt(iva);
+
   document.getElementById("totFinale").textContent = fmt(imp + iva);
 }
 

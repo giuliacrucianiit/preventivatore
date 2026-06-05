@@ -1,10 +1,5 @@
 """
 Preventivatore Web — backend Flask
-Unico file Python. Gestisce:
-- Lettura Excel prezziario
-- Ricerca voci
-- Rubrica clienti (JSON)
-- Generazione PDF
 """
 import json
 import io
@@ -14,28 +9,21 @@ from datetime import date
 
 from flask import Flask, jsonify, request, send_file, render_template_string
 
-# ── Percorsi ──────────────────────────────────────────────────────
 BASE = Path(__file__).parent
 DATA = BASE / "data"
 DATA.mkdir(exist_ok=True)
 
-PREZZIARIO_1 = DATA / "prezziario_1.xlsx"
-PREZZIARIO_2 = DATA / "prezziario_2.xlsx"
 CLIENTI_FILE = DATA / "clienti.json"
 IMPOSTAZIONI_FILE = DATA / "impostazioni.json"
 
-# ── Impostazioni default ──────────────────────────────────────────
 IMPOSTAZIONI_DEFAULT = {
     "azienda": {
         "nome": "", "indirizzo": "", "partita_iva": "",
         "telefono": "", "email": ""
     },
-    "iva_default": 22.0
 }
 
 app = Flask(__name__)
-
-# ── Cache prezziario in RAM ───────────────────────────────────────
 _voci_cache: list[dict] = []
 
 def carica_prezziario() -> list[dict]:
@@ -47,12 +35,15 @@ def carica_prezziario() -> list[dict]:
     except ImportError:
         return []
 
+    # Legge TUTTI gli xlsx nella cartella data/, qualunque nome abbiano
+    files = sorted(DATA.glob("*.xlsx"))
     voci = []
-    for percorso in [PREZZIARIO_1, PREZZIARIO_2]:
-        if not percorso.exists():
-            continue
+    for percorso in files:
         nome_sorgente = percorso.stem
-        wb = openpyxl.load_workbook(percorso, read_only=True, data_only=True)
+        try:
+            wb = openpyxl.load_workbook(percorso, read_only=True, data_only=True)
+        except Exception:
+            continue
         for nome_foglio in wb.sheetnames:
             ws = wb[nome_foglio]
             col = _rileva_colonne(ws)
@@ -92,9 +83,8 @@ def _rileva_colonne(ws) -> dict:
             if not cell.value: continue
             v = str(cell.value).strip().lower()
             for campo, keys in kw.items():
-                if col[campo] == list(kw.keys()).index(campo):  # ancora default
-                    if any(k in v for k in keys):
-                        col[campo] = cell.column - 1
+                if any(k in v for k in keys):
+                    col[campo] = cell.column - 1
     return col
 
 def _cell(row, idx):
@@ -108,7 +98,6 @@ def _parse_prezzo(v) -> float:
         return float(str(v).replace("€","").replace(" ","").replace(".","").replace(",","."))
     except: return 0.0
 
-# ── Clienti ───────────────────────────────────────────────────────
 def leggi_clienti() -> list:
     if not CLIENTI_FILE.exists(): return []
     return json.loads(CLIENTI_FILE.read_text(encoding="utf-8"))
@@ -116,7 +105,6 @@ def leggi_clienti() -> list:
 def scrivi_clienti(clienti: list):
     CLIENTI_FILE.write_text(json.dumps(clienti, ensure_ascii=False, indent=2), encoding="utf-8")
 
-# ── Impostazioni ──────────────────────────────────────────────────
 def leggi_impostazioni() -> dict:
     if not IMPOSTAZIONI_FILE.exists(): return dict(IMPOSTAZIONI_DEFAULT)
     try:
@@ -130,7 +118,6 @@ def leggi_impostazioni() -> dict:
 def scrivi_impostazioni(s: dict):
     IMPOSTAZIONI_FILE.write_text(json.dumps(s, ensure_ascii=False, indent=2), encoding="utf-8")
 
-# ── PDF ───────────────────────────────────────────────────────────
 def genera_pdf(doc: dict, impostazioni: dict) -> bytes:
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import cm
@@ -143,14 +130,11 @@ def genera_pdf(doc: dict, impostazioni: dict) -> bytes:
     az = impostazioni.get("azienda", {})
     righe = doc.get("righe", [])
     cliente = doc.get("cliente", {})
-    iva = float(doc.get("iva", 22))
     tipo = doc.get("tipo", "Preventivo").upper()
     numero = doc.get("numero", "")
     note = doc.get("note", "")
 
-    imponibile = sum(r["quantita"] * r["prezzo_unitario"] for r in righe)
-    iva_val = imponibile * iva / 100
-    totale = imponibile + iva_val
+    totale = sum(r["quantita"] * r["prezzo_unitario"] for r in righe)
 
     def fmt(v): return f"€ {v:,.2f}".replace(",","X").replace(".",",").replace("X",".")
     def p(testo, fs=9, bold=False, color="#333333", align=TA_LEFT):
@@ -163,7 +147,7 @@ def genera_pdf(doc: dict, impostazioni: dict) -> bytes:
     W = A4[0] - 4*cm
     el = []
 
-    # Header
+    # Header azienda + tipo documento
     az_lines = [p(az.get("nome",""), 13, True, "#1a1a2e")]
     for k in ("indirizzo","partita_iva","telefono","email"):
         if az.get(k): az_lines.append(p(az[k], 8, color="#666"))
@@ -218,17 +202,15 @@ def genera_pdf(doc: dict, impostazioni: dict) -> bytes:
     tv.setStyle(TableStyle(stile))
     el += [tv, Spacer(1,10)]
 
-    # Totali
+    # Totale finale (senza IVA)
     tt = Table([
-        ["","","","", p("Imponibile",9,color="#555"), p(fmt(imponibile),9,align=TA_RIGHT)],
-        ["","","","", p(f"IVA {iva:.0f}%",9,color="#555"), p(fmt(iva_val),9,align=TA_RIGHT)],
         ["","","","", p("TOTALE",11,True), p(fmt(totale),11,True,align=TA_RIGHT)],
     ], colWidths=cw)
     tt.setStyle(TableStyle([
         ("ALIGN",(4,0),(-1,-1),"RIGHT"),
-        ("BACKGROUND",(4,2),(-1,2),colors.HexColor("#f0f0f0")),
-        ("LINEABOVE",(4,2),(-1,2),0.8,colors.HexColor("#555")),
-        ("TOPPADDING",(0,0),(-1,-1),4),("BOTTOMPADDING",(0,0),(-1,-1),4),
+        ("BACKGROUND",(4,0),(-1,0),colors.HexColor("#f0f0f0")),
+        ("LINEABOVE",(4,0),(-1,0),0.8,colors.HexColor("#555")),
+        ("TOPPADDING",(0,0),(-1,-1),6),("BOTTOMPADDING",(0,0),(-1,-1),6),
     ]))
     el.append(tt)
 
@@ -246,11 +228,11 @@ def genera_pdf(doc: dict, impostazioni: dict) -> bytes:
     pdf.build(el, onFirstPage=footer, onLaterPages=footer)
     return buf.getvalue()
 
-# ── Routes API ────────────────────────────────────────────────────
+# ── Routes ────────────────────────────────────────────────────────
 
 @app.route("/")
 def index():
-    return render_template_string(open(BASE / "index.html", encoding="utf-8").read())
+    return open(BASE / "index.html", encoding="utf-8").read()
 
 @app.route("/api/prezziario")
 def api_prezziario():
@@ -332,6 +314,5 @@ def api_reload():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
     print(f"\n✓ Preventivatore avviato → http://localhost:{port}\n")
-    app.run(host="0.0.0.0", port=port, debug=debug)
+    app.run(host="0.0.0.0", port=port)
