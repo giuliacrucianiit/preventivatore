@@ -16,757 +16,588 @@
     --barra: #1a1a2e;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, 'Segoe UI', sans-serif; }
-  body { background: var(--bg); color: var(--testo); min-height: 100vh; }
+  body { background: var(--bg); color: var(--testo); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-  /* ── BARRA SUPERIORE ── */
+  /* ── BARRA ── */
   .barra {
-    background: var(--barra); color: white;
-    display: flex; align-items: center; gap: 12px;
-    padding: 0 16px; height: 52px;
-    position: sticky; top: 0; z-index: 100;
+    background: var(--barra); color: white; flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 16px; height: 50px;
     border-bottom: 2px solid var(--blu);
   }
-  .barra-titolo { font-size: 16px; font-weight: 700; white-space: nowrap; }
-  .barra-spacer { flex: 1; }
-  .barra-cliente { font-size: 12px; color: #aaa; max-width: 200px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .barra-titolo { font-size: 15px; font-weight: 700; white-space: nowrap; }
+  .barra-cliente { font-size: 12px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
   .barra-cliente.attivo { color: #81c784; font-weight: 600; }
-  .btn { border: none; border-radius: 6px; cursor: pointer;
-    font-size: 13px; padding: 0 14px; height: 34px;
-    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .sp { flex: 1; }
+  .btn { border: none; border-radius: 6px; cursor: pointer; font-size: 13px;
+    padding: 0 14px; height: 32px; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
   .btn-blu { background: var(--blu); color: white; font-weight: 600; }
   .btn-blu:hover { background: #1976D2; }
   .btn-verde { background: var(--verde); color: white; font-weight: 600; }
   .btn-verde:hover { background: #388e3c; }
-  .btn-ghost { background: transparent; color: #ccc;
-    border: 1px solid #444; font-size: 12px; }
+  .btn-ghost { background: transparent; color: #ccc; border: 1px solid #444; font-size: 12px; }
   .btn-ghost:hover { background: #2a2a4e; color: white; }
-  .btn-rosso { background: var(--rosso); color: white; }
-  .btn-sm { height: 28px; font-size: 12px; padding: 0 10px; }
 
   /* ── LAYOUT ── */
-  .layout { display: flex; gap: 0; height: calc(100vh - 52px); }
+  .layout { display: flex; flex: 1; overflow: hidden; }
 
-  /* ── PANNELLO SINISTRA: RICERCA ── */
-  .pannello-ricerca {
-    width: 420px; min-width: 320px; flex-shrink: 0;
+  /* ── SINISTRA ── */
+  .pannello-sx {
+    width: 45%; min-width: 380px; flex-shrink: 0;
     background: white; border-right: 1px solid var(--bordo);
     display: flex; flex-direction: column; overflow: hidden;
   }
-  .pannello-header {
-    padding: 14px 16px 10px; border-bottom: 1px solid var(--bordo);
-  }
-  .pannello-header h2 { font-size: 14px; margin-bottom: 10px; color: var(--testo); }
-  .campo-ricerca {
-    width: 100%; padding: 9px 12px; border: 1.5px solid var(--bordo);
-    border-radius: 8px; font-size: 14px; outline: none;
-    transition: border-color .15s;
-  }
-  .campo-ricerca:focus { border-color: var(--blu); }
-  .filtri { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-  .chip {
-    padding: 3px 10px; border-radius: 20px; font-size: 11px;
-    border: 1px solid var(--bordo); cursor: pointer; background: white;
-    transition: all .15s;
-  }
-  .chip.attivo { background: var(--blu); color: white; border-color: var(--blu); }
-  .risultati-count { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .sx-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--bordo); flex-shrink: 0; }
+  .sx-header h2 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .campo-cerca { width: 100%; padding: 8px 12px; border: 1.5px solid var(--bordo);
+    border-radius: 6px; font-size: 13px; outline: none; }
+  .campo-cerca:focus { border-color: var(--blu); }
+  .sx-filtri { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; }
+  .sx-filtri select { border: 1px solid var(--bordo); border-radius: 5px; padding: 3px 6px; font-size: 12px; outline: none; }
+  .count { font-size: 11px; color: var(--muted); margin-left: auto; }
 
-  .lista-risultati { flex: 1; overflow-y: auto; }
-  .tabella-prezziario { width: 100%; border-collapse: collapse; }
-  .tabella-prezziario thead th {
-    background: #f5f5f5; color: #555;
-    padding: 7px 10px; font-size: 12px; font-weight: 600;
-    text-align: left; border-bottom: 2px solid #ddd;
-    position: sticky; top: 0; z-index: 1;
+  /* Tabella prezziario — come il desktop */
+  .scroll-prezziario { flex: 1; overflow-y: auto; overflow-x: hidden; }
+  .tbl { width: 100%; border-collapse: collapse; }
+  .tbl thead th {
+    background: #f0f0f0; color: #444; font-size: 12px; font-weight: 600;
+    padding: 7px 8px; text-align: left; border-bottom: 2px solid #ccc;
+    position: sticky; top: 0; z-index: 2;
   }
-  .tabella-prezziario thead th.num { text-align: right; }
-  .tabella-prezziario tbody tr { border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-  .tabella-prezziario tbody tr:nth-child(even) { background: #fafafa; }
-  .tabella-prezziario tbody tr:hover { background: var(--blu-ch); }
-  .tabella-prezziario td { padding: 7px 10px; font-size: 12px; vertical-align: top; }
-  .tabella-prezziario td.cod { font-family: monospace; font-size: 11px; color: var(--muted); white-space: nowrap; }
-  .tabella-prezziario td.desc { line-height: 1.4; }
-  .tabella-prezziario td.num { text-align: right; white-space: nowrap; font-weight: 600; }
-  .tabella-prezziario td.um { white-space: nowrap; color: var(--muted); font-size: 11px; }
-  .btn-aggiungi {
-    background: var(--blu); color: white; border: none;
-    border-radius: 4px; padding: 3px 8px; font-size: 11px;
-    cursor: pointer; white-space: nowrap;
-  }
-  .btn-aggiungi:hover { background: var(--blu-sc); }
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+  .tbl thead th.r { text-align: right; }
+  .tbl tbody tr { border-bottom: 1px solid #efefef; cursor: pointer; }
+  .tbl tbody tr:nth-child(even) { background: #fafafa; }
+  .tbl tbody tr:hover { background: var(--blu-ch); }
+  .tbl td { padding: 6px 8px; font-size: 12px; vertical-align: top; }
+  .tbl td.cod { font-family: monospace; font-size: 11px; color: #888; white-space: nowrap; width: 80px; }
+  .tbl td.desc { line-height: 1.45; word-break: break-word; }
+  .tbl td.um { white-space: nowrap; color: #888; font-size: 11px; width: 50px; }
+  .tbl td.pr { text-align: right; white-space: nowrap; font-weight: 600; width: 80px; }
+  .tbl td.az { width: 70px; text-align: center; }
+  .btn-add { background: var(--blu); color: white; border: none;
+    border-radius: 4px; padding: 3px 8px; font-size: 11px; cursor: pointer; }
+  .btn-add:hover { background: var(--blu-sc); }
+  .sx-footer { padding: 8px 14px; border-top: 1px solid var(--bordo);
+    display: flex; align-items: center; justify-content: space-between;
+    background: #fafafa; flex-shrink: 0; }
 
-  /* ── PANNELLO DESTRA: DOCUMENTO ── */
-  .pannello-doc {
+  /* ── DESTRA ── */
+  .pannello-dx {
     flex: 1; display: flex; flex-direction: column;
-    overflow: hidden; background: white;
+    overflow: hidden; background: white; min-width: 0;
   }
-  .doc-header { padding: 12px 16px; border-bottom: 1px solid var(--bordo);
-    display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .doc-header select, .doc-header input {
-    border: 1px solid var(--bordo); border-radius: 6px;
-    padding: 5px 8px; font-size: 13px; outline: none;
-  }
-  .doc-header select:focus, .doc-header input:focus { border-color: var(--blu); }
+  .dx-header { padding: 10px 14px; border-bottom: 1px solid var(--bordo);
+    display: flex; gap: 8px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
+  .dx-header select, .dx-header input {
+    border: 1px solid var(--bordo); border-radius: 5px;
+    padding: 5px 8px; font-size: 12px; outline: none; }
+  .dx-header select:focus, .dx-header input:focus { border-color: var(--blu); }
 
-  .tabella-wrap { flex: 1; overflow-y: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    background: var(--barra); color: white;
-    padding: 9px 10px; font-size: 12px; text-align: left;
-    position: sticky; top: 0;
-  }
-  thead th.num { text-align: right; }
-  tbody tr { border-bottom: 1px solid #f0f0f0; }
-  tbody tr:nth-child(even) { background: #fafafa; }
-  tbody tr:hover { background: var(--blu-ch); }
-  td { padding: 8px 10px; font-size: 13px; vertical-align: middle; }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  td.tot { font-weight: 600; }
-  .qnt-ctrl { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
-  .qnt-btn {
-    width: 24px; height: 24px; border-radius: 4px;
-    border: 1px solid var(--bordo); background: white;
-    cursor: pointer; font-size: 14px; display: flex;
-    align-items: center; justify-content: center;
-  }
-  .qnt-btn:hover { background: var(--blu-ch); border-color: var(--blu); }
-  .qnt-input {
-    width: 50px; text-align: center; border: 1px solid var(--bordo);
-    border-radius: 4px; padding: 3px; font-size: 13px; outline: none;
-  }
-  .qnt-input:focus { border-color: var(--blu); }
-  .prezzo-input {
-    width: 80px; text-align: right; border: 1px solid var(--bordo);
-    border-radius: 4px; padding: 3px 6px; font-size: 13px; outline: none;
-  }
-  .prezzo-input:focus { border-color: var(--blu); }
-  .btn-del { background: none; border: none; color: #ccc;
-    cursor: pointer; font-size: 16px; padding: 2px 6px; }
+  .scroll-doc { flex: 1; overflow-y: auto; }
+  .doc-tbl { width: 100%; border-collapse: collapse; }
+  .doc-tbl thead th {
+    background: var(--barra); color: white; padding: 8px 10px;
+    font-size: 12px; text-align: left; position: sticky; top: 0; }
+  .doc-tbl thead th.r { text-align: right; }
+  .doc-tbl tbody tr { border-bottom: 1px solid #f0f0f0; }
+  .doc-tbl tbody tr:nth-child(even) { background: #fafafa; }
+  .doc-tbl td { padding: 7px 10px; font-size: 12px; vertical-align: middle; }
+  .doc-tbl td.r { text-align: right; font-variant-numeric: tabular-nums; }
+  .doc-tbl td.tot { text-align: right; font-weight: 600; }
+  .qnt-ctrl { display: flex; align-items: center; gap: 3px; justify-content: flex-end; }
+  .qb { width: 22px; height: 22px; border-radius: 3px; border: 1px solid var(--bordo);
+    background: white; cursor: pointer; font-size: 13px; }
+  .qb:hover { background: var(--blu-ch); }
+  .qi { width: 46px; text-align: center; border: 1px solid var(--bordo);
+    border-radius: 3px; padding: 2px; font-size: 12px; outline: none; }
+  .pi { width: 75px; text-align: right; border: 1px solid var(--bordo);
+    border-radius: 3px; padding: 2px 5px; font-size: 12px; outline: none; }
+  .btn-del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 15px; padding: 2px 5px; }
   .btn-del:hover { color: var(--rosso); }
+  .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; }
 
-  /* ── FOOTER TOTALI ── */
-  .footer-doc {
-    border-top: 1px solid var(--bordo); padding: 12px 16px;
-    display: flex; gap: 16px; align-items: flex-end;
-    flex-wrap: wrap; background: #fafafa;
-  }
-  .totali { flex: 1; }
-  .tot-row { display: flex; justify-content: space-between;
-    font-size: 13px; color: var(--muted); padding: 2px 0; max-width: 280px; }
-  .tot-row.finale { font-size: 16px; font-weight: 700;
-    color: var(--testo); padding-top: 6px;
-    border-top: 1px solid var(--bordo); margin-top: 4px; }
-  .iva-sel { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-  .iva-sel select { border: 1px solid var(--bordo); border-radius: 6px;
-    padding: 4px 6px; font-size: 13px; outline: none; }
-  .note-input { flex: 2; min-width: 200px; }
-  .note-input textarea {
-    width: 100%; height: 52px; border: 1px solid var(--bordo);
-    border-radius: 6px; padding: 6px 10px; font-size: 12px;
-    resize: none; outline: none; font-family: inherit;
-  }
-  .note-input textarea:focus { border-color: var(--blu); }
+  .dx-footer { border-top: 1px solid var(--bordo); padding: 10px 14px;
+    display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+    background: #fafafa; flex-shrink: 0; }
+  .totali { min-width: 200px; }
+  .tot-row { display: flex; justify-content: space-between; font-size: 13px;
+    color: var(--muted); padding: 2px 0; }
+  .tot-row.fin { font-size: 15px; font-weight: 700; color: var(--testo);
+    padding-top: 5px; border-top: 1px solid var(--bordo); margin-top: 3px; }
+  .note-box textarea { width: 100%; height: 50px; border: 1px solid var(--bordo);
+    border-radius: 5px; padding: 5px 8px; font-size: 12px; resize: none; outline: none; font-family: inherit; }
   .azioni { display: flex; gap: 8px; align-items: flex-end; }
 
   /* ── MODAL ── */
-  .overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,.45); z-index: 200;
-    align-items: center; justify-content: center;
-  }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4);
+    z-index: 200; align-items: center; justify-content: center; }
   .overlay.aperto { display: flex; }
-  .modal {
-    background: white; border-radius: 12px;
-    width: 680px; max-width: 95vw; max-height: 90vh;
-    display: flex; flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0,0,0,.3);
-  }
-  .modal-header {
-    padding: 16px 20px; border-bottom: 1px solid var(--bordo);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .modal-header h3 { font-size: 16px; }
-  .modal-chiudi { background: none; border: none; font-size: 20px;
-    cursor: pointer; color: var(--muted); line-height: 1; }
+  .modal { background: white; border-radius: 10px; width: 680px; max-width: 95vw;
+    max-height: 90vh; display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+  .modal-hdr { padding: 14px 18px; border-bottom: 1px solid var(--bordo);
+    display: flex; align-items: center; justify-content: space-between; }
+  .modal-hdr h3 { font-size: 15px; }
+  .modal-x { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
   .modal-body { display: flex; flex: 1; overflow: hidden; }
-  .modal-lista {
-    width: 200px; flex-shrink: 0; border-right: 1px solid var(--bordo);
-    display: flex; flex-direction: column; background: #f8f8f8;
-  }
+  .modal-lista { width: 190px; flex-shrink: 0; border-right: 1px solid var(--bordo);
+    display: flex; flex-direction: column; background: #f8f8f8; }
   .modal-lista-items { flex: 1; overflow-y: auto; }
-  .cliente-item {
-    padding: 10px 14px; cursor: pointer; font-size: 13px;
-    border-bottom: 1px solid #efefef;
-  }
-  .cliente-item:hover { background: var(--blu-ch); }
-  .cliente-item.attivo { background: var(--blu); color: white; }
-  .modal-lista-footer { padding: 10px; border-top: 1px solid var(--bordo); }
-  .modal-form { flex: 1; padding: 20px; overflow-y: auto; }
-  .form-row { margin-bottom: 14px; }
-  .form-row label { display: block; font-size: 12px;
-    color: var(--muted); margin-bottom: 4px; font-weight: 500; }
-  .form-row input {
-    width: 100%; padding: 8px 10px; border: 1.5px solid var(--bordo);
-    border-radius: 6px; font-size: 14px; outline: none;
-  }
-  .form-row input:focus { border-color: var(--blu); }
-  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .modal-footer {
-    padding: 14px 20px; border-top: 1px solid var(--bordo);
-    display: flex; gap: 10px; justify-content: flex-end;
-  }
+  .cli-item { padding: 9px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #eee; }
+  .cli-item:hover { background: var(--blu-ch); }
+  .cli-item.sel { background: var(--blu); color: white; }
+  .modal-lista-foot { padding: 8px; border-top: 1px solid var(--bordo); }
+  .modal-form { flex: 1; padding: 18px; overflow-y: auto; }
+  .fr { margin-bottom: 12px; }
+  .fr label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; font-weight: 600; }
+  .fr input { width: 100%; padding: 7px 10px; border: 1.5px solid var(--bordo); border-radius: 5px; font-size: 13px; outline: none; }
+  .fr input:focus { border-color: var(--blu); }
+  .fr2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-ftr { padding: 12px 18px; border-top: 1px solid var(--bordo);
+    display: flex; gap: 8px; justify-content: flex-end; }
+  .sett-body { padding: 18px; overflow-y: auto; }
+  .sett-sep { font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .06em; margin: 14px 0 8px; }
+  .sett-sep:first-child { margin-top: 0; }
 
-  /* ── MODAL IMPOSTAZIONI ── */
-  .sett-form { padding: 20px; overflow-y: auto; flex: 1; }
-  .sett-section { font-size: 11px; font-weight: 700; color: var(--muted);
-    text-transform: uppercase; letter-spacing: .06em;
-    margin: 18px 0 10px; }
-  .sett-section:first-child { margin-top: 0; }
+  /* TOAST */
+  .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    background: #333; color: white; padding: 9px 18px; border-radius: 7px;
+    font-size: 13px; z-index: 999; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .toast.on { opacity: 1; }
 
-  /* ── TOAST ── */
-  .toast {
-    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-    background: #333; color: white; padding: 10px 20px;
-    border-radius: 8px; font-size: 13px; z-index: 999;
-    opacity: 0; transition: opacity .3s; pointer-events: none;
-  }
-  .toast.visibile { opacity: 1; }
-
-  /* ── MOBILE ── */
   @media (max-width: 700px) {
-    .layout { flex-direction: column; height: auto; }
-    .pannello-ricerca { width: 100%; min-width: 0; height: 50vh; }
-    .pannello-doc { height: auto; min-height: 50vh; }
+    .layout { flex-direction: column; }
+    .pannello-sx { width: 100%; min-width: 0; height: 50vh; }
     .barra-cliente { display: none; }
-    .footer-doc { flex-direction: column; }
   }
 </style>
 </head>
 <body>
 
-<!-- ── BARRA SUPERIORE ── -->
 <div class="barra">
   <span class="barra-titolo">📋 Preventivatore</span>
-  <div class="barra-spacer"></div>
+  <div class="sp"></div>
   <span class="barra-cliente" id="barraCliente">Nessun cliente</span>
   <button class="btn btn-blu" onclick="apriClienti()">👤 Clienti</button>
-  <div class="barra-spacer"></div>
-  <button class="btn btn-ghost" onclick="nuovoDocumento()">＋ Nuovo</button>
+  <div class="sp"></div>
+  <button class="btn btn-ghost" onclick="nuovoDoc()">＋ Nuovo</button>
   <button class="btn btn-verde" onclick="esportaPDF()">📄 PDF</button>
-  <button class="btn btn-ghost" style="width:36px;padding:0;font-size:16px;" onclick="apriImpostazioni()">⚙</button>
+  <button class="btn btn-ghost" style="width:34px;padding:0" onclick="apriSett()">⚙</button>
 </div>
 
-<!-- ── LAYOUT PRINCIPALE ── -->
 <div class="layout">
 
-  <!-- SINISTRA: Ricerca -->
-  <div class="pannello-ricerca">
-    <div class="pannello-header">
+  <!-- SINISTRA: prezziario -->
+  <div class="pannello-sx">
+    <div class="sx-header">
       <h2>Prezziario</h2>
-      <input class="campo-ricerca" id="campoCerca" type="text"
-        placeholder='Cerca — es. "intonaco" o "1.1.20"'
-        oninput="cercaDebounce()">
-      <div class="filtri" id="filtriSorgente"></div>
-      <div class="risultati-count" id="risultatiCount">—</div>
-    </div>
-    <div class="lista-risultati" id="listaRisultati">
-      <div class="empty-state">Digita per cercare nel prezziario</div>
-    </div>
-  </div>
-
-  <!-- DESTRA: Documento -->
-  <div class="pannello-doc">
-    <div class="doc-header">
-      <select id="tipoDoc" onchange="stato.tipo=this.value">
-        <option value="Preventivo">Preventivo</option>
-        <option value="Fattura">Fattura</option>
-        <option value="Computo metrico">Computo metrico</option>
-      </select>
-      <span style="font-size:13px;color:var(--muted)">N°</span>
-      <input type="text" id="numeroDoc" placeholder="numero" style="width:80px"
-        oninput="stato.numero=this.value">
-      <span style="flex:1"></span>
-      <span id="clienteDoc" style="font-size:12px;color:var(--muted)">Nessun cliente</span>
+      <input class="campo-cerca" id="campoCerca" type="text"
+        placeholder='Cerca — es. "intonaco" o "1.1.20"' oninput="cercaDebounce()">
+      <div class="sx-filtri">
+        <span>Prezziario:</span>
+        <select id="selSorgente" onchange="eseguiRicerca()">
+          <option value="">Tutti i prezziari</option>
+        </select>
+        <span class="count" id="countLbl">—</span>
+      </div>
     </div>
 
-    <div class="tabella-wrap">
-      <table>
+    <div class="scroll-prezziario">
+      <table class="tbl">
         <thead>
           <tr>
             <th>Codice</th>
-            <th>Descrizione</th>
+            <th>Descrizione dell'articolo</th>
             <th>U.M.</th>
-            <th class="num">Quantità</th>
-            <th class="num">Prezzo u.</th>
-            <th class="num">Totale</th>
+            <th class="r">Prezzo €</th>
             <th></th>
           </tr>
         </thead>
-        <tbody id="tabellaRighe"></tbody>
+        <tbody id="tbodyPrezziario">
+          <tr><td colspan="5" class="empty">Digita per cercare nel prezziario</td></tr>
+        </tbody>
       </table>
-      <div id="docVuoto" class="empty-state" style="display:none">
-        Aggiungi voci dalla lista a sinistra
-      </div>
     </div>
 
-    <div class="footer-doc">
+    <div class="sx-footer">
+      <span id="footerCount" style="font-size:11px;color:var(--muted)">—</span>
+    </div>
+  </div>
+
+  <!-- DESTRA: documento -->
+  <div class="pannello-dx">
+    <div class="dx-header">
+      <select id="tipoDoc" onchange="stato.tipo=this.value">
+        <option>Preventivo</option><option>Fattura</option><option>Computo metrico</option>
+      </select>
+      <span style="font-size:12px;color:var(--muted)">N°</span>
+      <input type="text" id="numDoc" placeholder="numero" style="width:70px" oninput="stato.numero=this.value">
+      <span class="sp"></span>
+      <span id="clienteDoc" style="font-size:12px;color:var(--muted)">Nessun cliente</span>
+    </div>
+
+    <div class="scroll-doc">
+      <table class="doc-tbl">
+        <thead>
+          <tr>
+            <th>Codice</th><th>Descrizione</th><th>U.M.</th>
+            <th class="r">Qnt.</th><th class="r">Prezzo u.</th><th class="r">Totale</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tbodyDoc"></tbody>
+      </table>
+      <div id="docVuoto" class="empty">Aggiungi voci dalla lista a sinistra</div>
+    </div>
+
+    <div class="dx-footer">
       <div class="totali">
-  
-        <div class="tot-row finale"><span>TOTALE</span><span id="totFinale">€ 0,00</span></div>
+        <div class="tot-row fin"><span>TOTALE</span><span id="totale">€ 0,00</span></div>
       </div>
-      <div class="note-input">
-        <textarea id="noteDoc" placeholder="Note (opzionale)..."
-          oninput="stato.note=this.value"></textarea>
+      <div class="note-box" style="flex:1;min-width:180px">
+        <textarea id="noteDoc" placeholder="Note (opzionale)..." oninput="stato.note=this.value"></textarea>
       </div>
       <div class="azioni">
-        <button class="btn btn-ghost btn-sm" onclick="svuotaDocumento()" style="color:#e57373">🗑 Svuota</button>
+        <button class="btn btn-ghost" style="color:#e57373;font-size:12px" onclick="svuota()">🗑 Svuota</button>
         <button class="btn btn-verde" onclick="esportaPDF()">📄 Esporta PDF</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ── MODAL CLIENTI ── -->
-<div class="overlay" id="overlayClienti" onclick="chiudiClienti(event)">
+<!-- MODAL CLIENTI -->
+<div class="overlay" id="ovClienti" onclick="if(event.target===this)chiudiClienti()">
   <div class="modal">
-    <div class="modal-header">
+    <div class="modal-hdr">
       <h3>👤 Rubrica clienti</h3>
-      <button class="modal-chiudi" onclick="chiudiClienti()">×</button>
+      <button class="modal-x" onclick="chiudiClienti()">×</button>
     </div>
     <div class="modal-body">
       <div class="modal-lista">
         <div class="modal-lista-items" id="listaClienti"></div>
-        <div class="modal-lista-footer">
-          <button class="btn btn-blu btn-sm" style="width:100%" onclick="nuovoCliente()">＋ Nuovo</button>
+        <div class="modal-lista-foot">
+          <button class="btn btn-blu" style="width:100%;font-size:12px" onclick="nuovoCliente()">＋ Nuovo</button>
         </div>
       </div>
       <div class="modal-form" id="formCliente">
-        <div style="color:var(--muted);font-size:13px;padding-top:20px">
-          Seleziona un cliente dalla lista oppure creane uno nuovo
-        </div>
+        <div style="color:var(--muted);font-size:13px">Seleziona o crea un cliente</div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="eliminaCliente()" id="btnEliminaCliente" style="margin-right:auto;color:#e57373;display:none">Elimina</button>
+    <div class="modal-ftr">
+      <button class="btn btn-ghost" id="btnElimina" style="margin-right:auto;color:#e57373;display:none" onclick="eliminaCliente()">Elimina</button>
       <button class="btn btn-ghost" onclick="chiudiClienti()">Annulla</button>
-      <button class="btn btn-verde" onclick="usaCliente()" id="btnUsaCliente" disabled>✓ Usa questo cliente</button>
+      <button class="btn btn-verde" id="btnUsa" disabled onclick="usaCliente()">✓ Usa questo cliente</button>
     </div>
   </div>
 </div>
 
-<!-- ── MODAL IMPOSTAZIONI ── -->
-<div class="overlay" id="overlayImpostazioni" onclick="chiudiImpostazioni(event)">
-  <div class="modal" style="max-width:500px">
-    <div class="modal-header">
+<!-- MODAL IMPOSTAZIONI -->
+<div class="overlay" id="ovSett" onclick="if(event.target===this)chiudiSett()">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-hdr">
       <h3>⚙ Impostazioni azienda</h3>
-      <button class="modal-chiudi" onclick="chiudiImpostazioni()">×</button>
+      <button class="modal-x" onclick="chiudiSett()">×</button>
     </div>
-    <div class="sett-form">
-      <div class="sett-section">Dati azienda</div>
-      <div class="form-row"><label>Nome / Ragione sociale</label>
-        <input type="text" id="sNome" placeholder="Es. Studio Tecnico Rossi"></div>
-      <div class="form-row"><label>Indirizzo</label>
-        <input type="text" id="sIndirizzo"></div>
-      <div class="form-row-2">
-        <div class="form-row"><label>Partita IVA</label>
-          <input type="text" id="sPiva"></div>
-        <div class="form-row"><label>Telefono</label>
-          <input type="text" id="sTelefono"></div>
+    <div class="sett-body">
+      <div class="sett-sep">Dati azienda</div>
+      <div class="fr"><label>Nome / Ragione sociale</label><input id="sNome" type="text"></div>
+      <div class="fr"><label>Indirizzo</label><input id="sInd" type="text"></div>
+      <div class="fr2">
+        <div class="fr"><label>Partita IVA</label><input id="sPiva" type="text"></div>
+        <div class="fr"><label>Telefono</label><input id="sTel" type="text"></div>
       </div>
-      <div class="form-row"><label>Email</label>
-        <input type="email" id="sEmail"></div>
-      <div class="sett-section">IVA predefinita</div>
-      <div class="iva-sel">
-        <span>Aliquota default:</span>
-        <select id="sIvaDefault">
-          <option value="0">0%</option><option value="4">4%</option>
-          <option value="10">10%</option><option value="22" selected>22%</option>
-        </select>
-      </div>
+      <div class="fr"><label>Email</label><input id="sEmail" type="email"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="chiudiImpostazioni()">Annulla</button>
-      <button class="btn btn-verde" onclick="salvaImpostazioni()">Salva</button>
+    <div class="modal-ftr">
+      <button class="btn btn-ghost" onclick="chiudiSett()">Annulla</button>
+      <button class="btn btn-verde" onclick="salvaSett()">Salva</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATO APPLICAZIONE ────────────────────────────────────────────
-const stato = {
-  righe: [],       // [{codice, descrizione, um, quantita, prezzo_unitario}]
-  cliente: null,   // oggetto cliente selezionato
-  tipo: "Preventivo",
-  numero: "",
-  iva: 22,
-  note: "",
-};
+const stato = { righe:[], cliente:null, tipo:"Preventivo", numero:"", note:"" };
+let _clienti = [], _idxCli = -1, _dbTimer = null, _voci = [];
 
-let _clienti = [];
-let _indiceCliente = -1;
-let _debounceTimer = null;
-let _sorgenteFiltro = "";
-
-// ── UTILS ──────────────────────────────────────────────────────────
 function fmt(v) {
-  return "€ " + v.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return "€\u00a0" + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,".").replace(".",",").replace(/\.(?=\d{3})/g,".");
 }
+// Semplice formato europeo
+function fmtEU(v) {
+  if (v === 0) return "";
+  let s = v.toFixed(2);
+  let [int, dec] = s.split(".");
+  int = int.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return int + "," + dec;
+}
+
 function toast(msg, ms=2500) {
   const t = document.getElementById("toast");
-  t.textContent = msg; t.classList.add("visibile");
-  setTimeout(() => t.classList.remove("visibile"), ms);
+  t.textContent = msg; t.classList.add("on");
+  setTimeout(()=>t.classList.remove("on"), ms);
 }
 async function api(url, method="GET", body=null) {
-  const opts = { method, headers: {"Content-Type":"application/json"} };
-  if (body) opts.body = JSON.stringify(body);
-  const r = await fetch(url, opts);
-  return r;
+  const o = {method, headers:{"Content-Type":"application/json"}};
+  if (body) o.body = JSON.stringify(body);
+  return fetch(url, o);
 }
 
 // ── PREZZIARIO ────────────────────────────────────────────────────
 function cercaDebounce() {
-  clearTimeout(_debounceTimer);
-  _debounceTimer = setTimeout(eseguiRicerca, 220);
+  clearTimeout(_dbTimer);
+  _dbTimer = setTimeout(eseguiRicerca, 220);
 }
 
 async function eseguiRicerca() {
   const q = document.getElementById("campoCerca").value.trim();
-  const url = `/api/prezziario?q=${encodeURIComponent(q)}&sorgente=${encodeURIComponent(_sorgenteFiltro)}`;
-  const r = await api(url);
-  const voci = await r.json();
-  renderRisultati(voci, q);
+  const s = document.getElementById("selSorgente").value;
+  const r = await api(`/api/prezziario?q=${encodeURIComponent(q)}&sorgente=${encodeURIComponent(s)}`);
+  _voci = await r.json();
+  renderPrezziario(_voci, q);
 }
 
-function renderRisultati(voci, q) {
-  const el = document.getElementById("listaRisultati");
-  document.getElementById("risultatiCount").textContent =
-    q ? `${voci.length} risultati` : `${voci.length} voci`;
+function renderPrezziario(voci, q) {
+  const n = voci.length;
+  document.getElementById("countLbl").textContent = q ? `${n} risultati` : `${n} voci`;
+  document.getElementById("footerCount").textContent = `✓ Prezziario caricato`;
 
+  const tbody = document.getElementById("tbodyPrezziario");
   if (!voci.length) {
-    el.innerHTML = `<div class="empty-state">Nessun risultato per "${q}"</div>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="empty">Nessun risultato per "${q}"</td></tr>`;
     return;
   }
-  el.innerHTML = `
-    <table class="tabella-prezziario">
-      <thead>
-        <tr>
-          <th>Codice</th>
-          <th>Descrizione</th>
-          <th>U.M.</th>
-          <th class="num">Prezzo €</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        ${voci.map((v,i) => `
-          <tr ondblclick="aggiungiVoce(${i})">
-            <td class="cod">${v.codice || ""}</td>
-            <td class="desc">${v.descrizione || ""}</td>
-            <td class="um">${v.um || ""}</td>
-            <td class="num">${v.prezzo > 0 ? fmt(v.prezzo) : ""}</td>
-            <td><button class="btn-aggiungi" onclick="aggiungiVoce(${i})">+ Aggiungi</button></td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>`;
-  window._ultimi_risultati = voci;
+  tbody.innerHTML = voci.map((v,i) => `
+    <tr ondblclick="aggiungi(${i})">
+      <td class="cod">${v.codice||""}</td>
+      <td class="desc">${v.descrizione||""}</td>
+      <td class="um">${v.um||""}</td>
+      <td class="pr">${v.prezzo>0 ? fmtEU(v.prezzo) : ""}</td>
+      <td class="az"><button class="btn-add" onclick="aggiungi(${i})">+ Aggiungi</button></td>
+    </tr>`).join("");
 }
 
-function aggiungiVoce(i) {
-  const v = window._ultimi_risultati?.[i];
+function aggiungi(i) {
+  const v = _voci[i];
   if (!v) return;
   stato.righe.push({
-    codice: v.codice || "",
-    descrizione: v.descrizione || "",
-    um: v.um || "cad",
-    quantita: 1,
-    prezzo_unitario: v.prezzo || 0,
+    codice: v.codice||"", descrizione: v.descrizione||"",
+    um: v.um||"cad", quantita: 1, prezzo_unitario: v.prezzo||0
   });
-  renderTabella();
-  toast("✓ Voce aggiunta");
+  renderDoc();
+  toast("✓ Aggiunto");
 }
 
 async function caricaSorgenti() {
   const r = await api("/api/prezziario/sorgenti");
   const sorgenti = await r.json();
-  const el = document.getElementById("filtriSorgente");
-  el.innerHTML = `<span class="chip attivo" onclick="filtraSorgente('')">Tutti</span>` +
-    sorgenti.map(s => `<span class="chip" onclick="filtraSorgente('${s}')">${s}</span>`).join("");
-}
-
-function filtraSorgente(s) {
-  _sorgenteFiltro = s;
-  document.querySelectorAll(".chip").forEach(c => {
-    c.classList.toggle("attivo",
-      (s === "" && c.textContent === "Tutti") || c.textContent === s);
-  });
-  eseguiRicerca();
+  const sel = document.getElementById("selSorgente");
+  sel.innerHTML = `<option value="">Tutti i prezziari</option>` +
+    sorgenti.map(s=>`<option value="${s}">${s}</option>`).join("");
 }
 
 // ── DOCUMENTO ─────────────────────────────────────────────────────
-function renderTabella() {
-  const tbody = document.getElementById("tabellaRighe");
+function renderDoc() {
+  const tbody = document.getElementById("tbodyDoc");
   const vuoto = document.getElementById("docVuoto");
 
   if (!stato.righe.length) {
-    tbody.innerHTML = "";
-    vuoto.style.display = "block";
-    aggiornaTotali();
-    return;
+    tbody.innerHTML = ""; vuoto.style.display="block";
+    aggiornaTot(); return;
   }
   vuoto.style.display = "none";
-
   tbody.innerHTML = stato.righe.map((r,i) => `
     <tr>
-      <td><span style="font-size:11px;font-family:monospace;color:var(--muted)">${r.codice}</span></td>
-      <td style="max-width:260px">
-        <input style="width:100%;border:none;background:transparent;font-size:13px;outline:none"
-          value="${r.descrizione.replace(/"/g,'&quot;')}"
-          onchange="stato.righe[${i}].descrizione=this.value">
-      </td>
-      <td style="font-size:11px;color:var(--muted)">${r.um}</td>
-      <td class="num">
+      <td style="font-size:11px;font-family:monospace;color:#888">${r.codice}</td>
+      <td style="font-size:12px;line-height:1.4">${r.descrizione}</td>
+      <td style="font-size:11px;color:#888">${r.um}</td>
+      <td class="r">
         <div class="qnt-ctrl">
-          <button class="qnt-btn" onclick="cambiaQnt(${i},-1)">−</button>
-          <input class="qnt-input" type="number" value="${r.quantita}" min="0"
-            onchange="setQnt(${i},+this.value)">
-          <button class="qnt-btn" onclick="cambiaQnt(${i},1)">+</button>
+          <button class="qb" onclick="dq(${i},-1)">−</button>
+          <input class="qi" type="number" value="${r.quantita}" min="0" onchange="sq(${i},+this.value)">
+          <button class="qb" onclick="dq(${i},1)">+</button>
         </div>
       </td>
-      <td class="num">
-        <input class="prezzo-input" type="number" step="0.01" value="${r.prezzo_unitario}"
-          onchange="setPrezzo(${i},+this.value)">
-      </td>
-      <td class="num tot">${fmt(r.quantita * r.prezzo_unitario)}</td>
-      <td><button class="btn-del" onclick="eliminaRiga(${i})">✕</button></td>
-    </tr>
-  `).join("");
-  aggiornaTotali();
+      <td class="r"><input class="pi" type="number" step="0.01" value="${r.prezzo_unitario}" onchange="sp(${i},+this.value)"></td>
+      <td class="tot">${fmtEU(r.quantita*r.prezzo_unitario)}</td>
+      <td><button class="btn-del" onclick="delRiga(${i})">✕</button></td>
+    </tr>`).join("");
+  aggiornaTot();
 }
 
-function cambiaQnt(i, delta) {
-  stato.righe[i].quantita = Math.max(0, stato.righe[i].quantita + delta);
-  renderTabella();
-}
-function setQnt(i, v) { stato.righe[i].quantita = Math.max(0, v||0); renderTabella(); }
-function setPrezzo(i, v) { stato.righe[i].prezzo_unitario = Math.max(0, v||0); renderTabella(); }
-function eliminaRiga(i) { stato.righe.splice(i,1); renderTabella(); }
+function dq(i,d){ stato.righe[i].quantita=Math.max(0,stato.righe[i].quantita+d); renderDoc(); }
+function sq(i,v){ stato.righe[i].quantita=Math.max(0,v||0); renderDoc(); }
+function sp(i,v){ stato.righe[i].prezzo_unitario=Math.max(0,v||0); renderDoc(); }
+function delRiga(i){ stato.righe.splice(i,1); renderDoc(); }
 
-function aggiornaTotali() {
-  const imp = stato.righe.reduce((s,r) => s + r.quantita * r.prezzo_unitario, 0);
-  const iva = imp * stato.iva / 100;
-  document.getElementById("totImponibile").textContent = fmt(imp);
-
-  document.getElementById("totFinale").textContent = fmt(imp + iva);
+function aggiornaTot() {
+  const tot = stato.righe.reduce((s,r)=>s+r.quantita*r.prezzo_unitario, 0);
+  document.getElementById("totale").textContent = "€\u00a0" + fmtEU(tot);
 }
 
-function nuovoDocumento() {
-  if (stato.righe.length && !confirm("Vuoi creare un nuovo documento? Il corrente non verrà salvato.")) return;
-  stato.righe = []; stato.cliente = null; stato.numero = "";
-  stato.tipo = "Preventivo"; stato.note = "";
-  document.getElementById("tipoDoc").value = "Preventivo";
-  document.getElementById("numeroDoc").value = "";
-  document.getElementById("noteDoc").value = "";
-  aggiornaInfoCliente();
-  renderTabella();
+function nuovoDoc() {
+  if (stato.righe.length && !confirm("Nuovo documento? Il corrente non verrà salvato.")) return;
+  stato.righe=[]; stato.cliente=null; stato.numero=""; stato.note="";
+  stato.tipo="Preventivo";
+  document.getElementById("tipoDoc").value="Preventivo";
+  document.getElementById("numDoc").value="";
+  document.getElementById("noteDoc").value="";
+  aggiornaInfoCliente(); renderDoc();
 }
-
-function svuotaDocumento() {
+function svuota() {
   if (!stato.righe.length) return;
-  if (confirm("Rimuovere tutte le righe?")) { stato.righe = []; renderTabella(); }
+  if (confirm("Rimuovere tutte le righe?")) { stato.righe=[]; renderDoc(); }
 }
 
 async function esportaPDF() {
   if (!stato.righe.length) { toast("⚠ Aggiungi almeno una voce"); return; }
-  toast("Generazione PDF...", 4000);
-  const payload = {
-    righe: stato.righe,
-    cliente: stato.cliente || {},
-    tipo: stato.tipo,
-    numero: stato.numero,
-    iva: stato.iva,
-    note: stato.note,
-  };
-  const r = await fetch("/api/pdf", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify(payload)
-  });
-  if (!r.ok) { toast("❌ Errore generazione PDF"); return; }
-  const blob = await r.blob();
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `preventivo_${new Date().toISOString().slice(0,10)}.pdf`;
-  a.click();
-  toast("✓ PDF scaricato");
+  toast("Generazione PDF...", 5000);
+  try {
+    const r = await fetch("/api/pdf", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        righe: stato.righe,
+        cliente: stato.cliente||{},
+        tipo: stato.tipo,
+        numero: stato.numero,
+        note: stato.note,
+      })
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(()=>({errore:"Errore sconosciuto"}));
+      toast("❌ " + (err.errore||"Errore PDF")); return;
+    }
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `preventivo_${new Date().toISOString().slice(0,10)}.pdf`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    toast("✓ PDF scaricato");
+  } catch(e) { toast("❌ Errore: " + e.message); }
 }
 
 // ── CLIENTI ───────────────────────────────────────────────────────
 async function apriClienti() {
   const r = await api("/api/clienti");
-  _clienti = await r.json();
-  _indiceCliente = -1;
-  renderListaClienti();
-  renderFormCliente(null);
-  document.getElementById("overlayClienti").classList.add("aperto");
+  _clienti = await r.json(); _idxCli = -1;
+  renderListaCli(); renderFormCli(null);
+  document.getElementById("ovClienti").classList.add("aperto");
+}
+function chiudiClienti() { document.getElementById("ovClienti").classList.remove("aperto"); }
+
+function renderListaCli() {
+  document.getElementById("listaClienti").innerHTML =
+    _clienti.map((c,i)=>`<div class="cli-item ${i===_idxCli?'sel':''}" onclick="selCli(${i})">${c.nome||"(senza nome)"}</div>`).join("")
+    || `<div style="padding:12px;font-size:12px;color:var(--muted)">Nessun cliente</div>`;
 }
 
-function chiudiClienti(e) {
-  if (e && e.target !== document.getElementById("overlayClienti")) return;
-  document.getElementById("overlayClienti").classList.remove("aperto");
+function selCli(i) {
+  _idxCli = i; renderListaCli(); renderFormCli(_clienti[i]);
+  document.getElementById("btnUsa").disabled = false;
+  document.getElementById("btnElimina").style.display = "inline-flex";
 }
 
-function renderListaClienti() {
-  document.getElementById("listaClienti").innerHTML = _clienti.map((c,i) =>
-    `<div class="cliente-item ${i===_indiceCliente?'attivo':''}" onclick="selezionaCliente(${i})">
-      ${c.nome || "(senza nome)"}
-    </div>`
-  ).join("") || `<div style="padding:14px;font-size:12px;color:var(--muted)">Nessun cliente salvato</div>`;
-}
-
-function selezionaCliente(i) {
-  _indiceCliente = i;
-  renderListaClienti();
-  renderFormCliente(_clienti[i]);
-  document.getElementById("btnUsaCliente").disabled = false;
-  document.getElementById("btnEliminaCliente").style.display = "inline-flex";
-}
-
-function renderFormCliente(c) {
-  const form = document.getElementById("formCliente");
+function renderFormCli(c) {
+  const f = document.getElementById("formCliente");
   if (!c) {
-    form.innerHTML = `<div style="color:var(--muted);font-size:13px;padding-top:20px">
-      Seleziona un cliente o creane uno nuovo</div>`;
-    document.getElementById("btnUsaCliente").disabled = true;
-    document.getElementById("btnEliminaCliente").style.display = "none";
-    return;
+    f.innerHTML=`<div style="color:var(--muted);font-size:13px">Seleziona o crea un cliente</div>`;
+    document.getElementById("btnUsa").disabled=true;
+    document.getElementById("btnElimina").style.display="none"; return;
   }
-  form.innerHTML = `
-    <div class="form-row"><label>Nome / Ragione sociale *</label>
-      <input type="text" id="cNome" value="${c.nome||''}" placeholder="Es. Rossi Costruzioni S.r.l."
-        oninput="document.getElementById('btnUsaCliente').disabled=!this.value.trim()"></div>
-    <div class="form-row"><label>Indirizzo</label>
-      <input type="text" id="cIndirizzo" value="${c.indirizzo||''}"></div>
-    <div class="form-row-2">
-      <div class="form-row"><label>Partita IVA</label>
-        <input type="text" id="cPiva" value="${c.partita_iva||''}"></div>
-      <div class="form-row"><label>Codice Fiscale</label>
-        <input type="text" id="cCf" value="${c.codice_fiscale||''}"></div>
+  f.innerHTML=`
+    <div class="fr"><label>Nome / Ragione sociale *</label>
+      <input id="cNome" type="text" value="${c.nome||''}"
+        oninput="document.getElementById('btnUsa').disabled=!this.value.trim()"></div>
+    <div class="fr"><label>Indirizzo</label><input id="cInd" type="text" value="${c.indirizzo||''}"></div>
+    <div class="fr2">
+      <div class="fr"><label>Partita IVA</label><input id="cPiva" type="text" value="${c.partita_iva||''}"></div>
+      <div class="fr"><label>Cod. Fiscale</label><input id="cCf" type="text" value="${c.codice_fiscale||''}"></div>
     </div>
-    <div class="form-row-2">
-      <div class="form-row"><label>Telefono</label>
-        <input type="text" id="cTelefono" value="${c.telefono||''}"></div>
-      <div class="form-row"><label>Email</label>
-        <input type="email" id="cEmail" value="${c.email||''}"></div>
-    </div>
-  `;
-  document.getElementById("btnUsaCliente").disabled = !c.nome;
+    <div class="fr2">
+      <div class="fr"><label>Telefono</label><input id="cTel" type="text" value="${c.telefono||''}"></div>
+      <div class="fr"><label>Email</label><input id="cEmail" type="email" value="${c.email||''}"></div>
+    </div>`;
+  document.getElementById("btnUsa").disabled = !c.nome;
 }
 
-function leggiFormCliente() {
+function leggiFormCli() {
   return {
-    nome: document.getElementById("cNome")?.value.trim() || "",
-    indirizzo: document.getElementById("cIndirizzo")?.value.trim() || "",
-    partita_iva: document.getElementById("cPiva")?.value.trim() || "",
-    codice_fiscale: document.getElementById("cCf")?.value.trim() || "",
-    telefono: document.getElementById("cTelefono")?.value.trim() || "",
-    email: document.getElementById("cEmail")?.value.trim() || "",
+    nome: document.getElementById("cNome")?.value.trim()||"",
+    indirizzo: document.getElementById("cInd")?.value.trim()||"",
+    partita_iva: document.getElementById("cPiva")?.value.trim()||"",
+    codice_fiscale: document.getElementById("cCf")?.value.trim()||"",
+    telefono: document.getElementById("cTel")?.value.trim()||"",
+    email: document.getElementById("cEmail")?.value.trim()||"",
   };
 }
 
 async function nuovoCliente() {
-  const c = {nome:"", indirizzo:"", partita_iva:"", codice_fiscale:"", telefono:"", email:""};
-  const r = await api("/api/clienti","POST", c);
+  const r = await api("/api/clienti","POST",{nome:"",indirizzo:"",partita_iva:"",codice_fiscale:"",telefono:"",email:""});
   const res = await r.json();
   _clienti = await (await api("/api/clienti")).json();
-  _indiceCliente = res.index;
-  renderListaClienti();
-  renderFormCliente(_clienti[_indiceCliente]);
+  _idxCli = res.index;
+  renderListaCli(); renderFormCli(_clienti[_idxCli]);
   document.getElementById("cNome")?.focus();
+  document.getElementById("btnElimina").style.display="inline-flex";
 }
 
 async function usaCliente() {
-  if (_indiceCliente < 0) return;
-  const c = leggiFormCliente();
+  if (_idxCli < 0) return;
+  const c = leggiFormCli();
   if (!c.nome) { document.getElementById("cNome")?.focus(); return; }
-  // Salva sempre prima di usare
-  await api(`/api/clienti/${_indiceCliente}`, "PUT", c);
-  stato.cliente = c;
-  aggiornaInfoCliente();
-  chiudiClienti();
+  await api(`/api/clienti/${_idxCli}`,"PUT",c);
+  stato.cliente = c; aggiornaInfoCliente(); chiudiClienti();
   toast(`✓ Cliente: ${c.nome}`);
 }
 
 async function eliminaCliente() {
-  if (_indiceCliente < 0) return;
-  const nome = _clienti[_indiceCliente].nome || "(senza nome)";
-  if (!confirm(`Eliminare "${nome}"?`)) return;
-  await api(`/api/clienti/${_indiceCliente}`, "DELETE");
+  if (_idxCli<0) return;
+  if (!confirm(`Eliminare "${_clienti[_idxCli].nome||'questo cliente'}"?`)) return;
+  await api(`/api/clienti/${_idxCli}`,"DELETE");
   _clienti = await (await api("/api/clienti")).json();
-  _indiceCliente = -1;
-  renderListaClienti();
-  renderFormCliente(null);
+  _idxCli=-1; renderListaCli(); renderFormCli(null);
 }
 
 function aggiornaInfoCliente() {
-  const barra = document.getElementById("barraCliente");
-  const docEl = document.getElementById("clienteDoc");
+  const b = document.getElementById("barraCliente");
+  const d = document.getElementById("clienteDoc");
   if (stato.cliente?.nome) {
-    barra.textContent = "✓ " + stato.cliente.nome;
-    barra.className = "barra-cliente attivo";
-    docEl.textContent = stato.cliente.nome;
-    docEl.style.color = "var(--testo)";
+    b.textContent="✓ "+stato.cliente.nome; b.className="barra-cliente attivo";
+    d.textContent=stato.cliente.nome; d.style.color="var(--testo)";
   } else {
-    barra.textContent = "Nessun cliente";
-    barra.className = "barra-cliente";
-    docEl.textContent = "Nessun cliente";
-    docEl.style.color = "var(--muted)";
+    b.textContent="Nessun cliente"; b.className="barra-cliente";
+    d.textContent="Nessun cliente"; d.style.color="var(--muted)";
   }
 }
 
 // ── IMPOSTAZIONI ──────────────────────────────────────────────────
-async function apriImpostazioni() {
+async function apriSett() {
   const r = await api("/api/impostazioni");
-  const s = await r.json();
-  const az = s.azienda || {};
-  document.getElementById("sNome").value = az.nome || "";
-  document.getElementById("sIndirizzo").value = az.indirizzo || "";
-  document.getElementById("sPiva").value = az.partita_iva || "";
-  document.getElementById("sTelefono").value = az.telefono || "";
-  document.getElementById("sEmail").value = az.email || "";
-  document.getElementById("sIvaDefault").value = s.iva_default || 22;
-  document.getElementById("overlayImpostazioni").classList.add("aperto");
+  const s = await r.json(); const az = s.azienda||{};
+  document.getElementById("sNome").value=az.nome||"";
+  document.getElementById("sInd").value=az.indirizzo||"";
+  document.getElementById("sPiva").value=az.partita_iva||"";
+  document.getElementById("sTel").value=az.telefono||"";
+  document.getElementById("sEmail").value=az.email||"";
+  document.getElementById("ovSett").classList.add("aperto");
 }
-
-function chiudiImpostazioni(e) {
-  if (e && e.target !== document.getElementById("overlayImpostazioni")) return;
-  document.getElementById("overlayImpostazioni").classList.remove("aperto");
-}
-
-async function salvaImpostazioni() {
-  const s = {
-    azienda: {
-      nome: document.getElementById("sNome").value.trim(),
-      indirizzo: document.getElementById("sIndirizzo").value.trim(),
-      partita_iva: document.getElementById("sPiva").value.trim(),
-      telefono: document.getElementById("sTelefono").value.trim(),
-      email: document.getElementById("sEmail").value.trim(),
-    },
-    iva_default: +document.getElementById("sIvaDefault").value
-  };
-  await api("/api/impostazioni","POST",s);
-  chiudiImpostazioni();
-  toast("✓ Impostazioni salvate");
+function chiudiSett() { document.getElementById("ovSett").classList.remove("aperto"); }
+async function salvaSett() {
+  await api("/api/impostazioni","POST",{azienda:{
+    nome:document.getElementById("sNome").value.trim(),
+    indirizzo:document.getElementById("sInd").value.trim(),
+    partita_iva:document.getElementById("sPiva").value.trim(),
+    telefono:document.getElementById("sTel").value.trim(),
+    email:document.getElementById("sEmail").value.trim(),
+  }});
+  chiudiSett(); toast("✓ Salvato");
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
-window.addEventListener("DOMContentLoaded", () => {
-  caricaSorgenti();
+window.addEventListener("DOMContentLoaded", async () => {
+  await caricaSorgenti();
   eseguiRicerca();
 });
 </script>
