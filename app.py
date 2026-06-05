@@ -46,29 +46,48 @@ def carica_prezziario() -> list[dict]:
             continue
         for nome_foglio in wb.sheetnames:
             ws = wb[nome_foglio]
-            col = _rileva_colonne(ws)
-            for row in ws.iter_rows(values_only=True):
-                if not row or all(v is None for v in row):
-                    continue
-                codice = _cell(row, col["codice"])
-                descrizione = _cell(row, col["descrizione"])
-                if not descrizione or descrizione.lower() in ("descrizione","voce","lavorazione"):
-                    continue
-                prezzo = _parse_prezzo(_cell(row, col["prezzo"]))
-                if prezzo == 0 and not codice:
-                    continue
-                um = _cell(row, col["um"]) or "cad"
-                voci.append({
-                    "codice": codice,
-                    "descrizione": descrizione,
-                    "prezzo": prezzo,
-                    "um": um,
-                    "sorgente": nome_sorgente,
-                    "foglio": nome_foglio,
-                })
+            voci.extend(_leggi_foglio(ws, nome_sorgente, nome_foglio))
         wb.close()
     _voci_cache = voci
     return voci
+
+
+def _leggi_foglio(ws, nome_sorgente: str, nome_foglio: str) -> list[dict]:
+    col = _rileva_colonne(ws)
+    skip = {"numero d'ordine","codice","cod.","n.",
+            "descrizione dell'articolo","descrizione","voce","lavorazione",
+            "u.m.","um","prezzo","prezzo €"}
+    voci = []
+    corrente = None
+    for row in ws.iter_rows(values_only=True):
+        if not row or all(v is None for v in row): continue
+        codice = _cell(row, col["codice"])
+        desc   = _cell(row, col["descrizione"])
+        um     = _cell(row, col["um"])
+        # parse prezzo dalla cella raw
+        raw = row[col["prezzo"]] if col["prezzo"] < len(row) else None
+        if raw is None: prezzo = 0.0
+        elif isinstance(raw, (int, float)): prezzo = float(raw)
+        else: prezzo = _parse_prezzo(str(raw))
+        if codice.lower() in skip or desc.lower() in skip: continue
+        ha_cod = bool(codice); ha_desc = bool(desc)
+        ha_p = prezzo > 0;     ha_um = bool(um)
+        if ha_cod and ha_desc:
+            if corrente: voci.append(corrente)
+            corrente = {"codice":codice,"descrizione":desc,"prezzo":prezzo,
+                        "um":um or "","sorgente":nome_sorgente,"foglio":nome_foglio}
+        elif ha_cod and not ha_desc:
+            if corrente: voci.append(corrente)
+            corrente = None
+        elif not ha_cod and ha_desc and corrente:
+            corrente["descrizione"] += " " + desc
+            if ha_p and corrente["prezzo"]==0: corrente["prezzo"] = prezzo
+            if ha_um and not corrente["um"]: corrente["um"] = um
+        elif not ha_cod and not ha_desc and corrente:
+            if ha_p and corrente["prezzo"]==0: corrente["prezzo"] = prezzo
+            if ha_um and not corrente["um"]: corrente["um"] = um
+    if corrente: voci.append(corrente)
+    return [v for v in voci if v["descrizione"].strip()]
 
 def _rileva_colonne(ws) -> dict:
     col = {"codice": 0, "descrizione": 1, "prezzo": 2, "um": 3}
