@@ -97,24 +97,9 @@ def _leggi_foglio(ws, nome_sorgente: str, nome_foglio: str) -> list[dict]:
     return voci
 
 def _rileva_colonne(ws) -> dict:
-    # Default: A=codice, B=descrizione, C=um, D=prezzo
-    col = {"codice": 0, "descrizione": 1, "um": 2, "prezzo": 3}
-    kw = {
-        "codice":      ["numero d'ordine", "numero", "codice", "cod.", "n."],
-        "descrizione": ["descrizione dell'articolo", "descrizione", "lavorazione", "voce"],
-        "um":          ["u.m.", "um", "unità", "misura"],
-        "prezzo":      ["prezzo €", "prezzo", "importo"],
-    }
-    trovati = {}
-    for row in ws.iter_rows(min_row=1, max_row=5):
-        for cell in row:
-            if not cell.value: continue
-            v = str(cell.value).strip().lower().replace("\n", " ").replace("\r", " ")
-            for campo, keys in kw.items():
-                if campo not in trovati and any(k in v for k in keys):
-                    trovati[campo] = cell.column - 1
-    col.update(trovati)
-    return col
+    # Forza sempre: A=codice(0), B=descrizione(1), C=um(2), D=prezzo(3)
+    # Corrisponde esattamente al formato del prezziario regionale
+    return {"codice": 0, "descrizione": 1, "um": 2, "prezzo": 3}
 
 def _cell(row, idx):
     if idx is None or idx >= len(row): return ""
