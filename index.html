@@ -170,10 +170,79 @@
     font-size: 13px; z-index: 999; opacity: 0; transition: opacity .25s; pointer-events: none; }
   .toast.on { opacity: 1; }
 
+  /* ── MOBILE ── */
   @media (max-width: 700px) {
-    .layout { flex-direction: column; }
-    .pannello-sx { width: 100%; min-width: 0; height: 50vh; }
+    body { overflow: hidden; }
+
+    /* Barra mobile semplificata */
+    .barra { padding: 0 12px; height: 48px; }
+    .barra-titolo { font-size: 14px; }
     .barra-cliente { display: none; }
+    .btn-ghost { display: none; }
+    /* Mostra solo clienti e PDF */
+    .btn-blu, .btn-verde { height: 30px; font-size: 12px; padding: 0 10px; }
+
+    /* Layout: una schermata alla volta */
+    .layout { position: relative; overflow: hidden; }
+    .pannello-sx {
+      position: absolute; inset: 0;
+      width: 100%; min-width: 0;
+      transition: transform .3s ease;
+      transform: translateX(0);
+      z-index: 2;
+    }
+    .pannello-dx {
+      position: absolute; inset: 0;
+      transition: transform .3s ease;
+      transform: translateX(100%);
+      z-index: 1;
+    }
+    .mostra-doc .pannello-sx { transform: translateX(-100%); }
+    .mostra-doc .pannello-dx { transform: translateX(0); }
+
+    /* Tab bar in fondo */
+    .tab-bar {
+      display: flex !important;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: white; border-top: 1px solid var(--bordo);
+      z-index: 100; height: 56px;
+    }
+    .tab-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 11px; color: var(--muted);
+      cursor: pointer; gap: 3px; border: none; background: none;
+    }
+    .tab-item.attivo { color: var(--blu); }
+    .tab-item .tab-icon { font-size: 22px; line-height: 1; }
+    .tab-badge {
+      background: var(--rosso); color: white;
+      border-radius: 10px; font-size: 10px;
+      padding: 1px 5px; min-width: 18px; text-align: center;
+      display: none;
+    }
+    .tab-badge.visibile { display: inline-block; }
+
+    /* Aggiusta padding per tab bar */
+    .pannello-sx, .pannello-dx { padding-bottom: 56px; }
+    .sx-footer { bottom: 56px; }
+
+    /* Bottoni più grandi su mobile */
+    .btn-add { padding: 6px 12px; font-size: 13px; }
+    .tbl td { padding: 8px 6px; font-size: 13px; }
+    .tbl td.cod { font-size: 12px; }
+    .tbl thead th { font-size: 12px; padding: 8px 6px; }
+
+    /* Controlli quantità più grandi */
+    .qb { width: 32px; height: 32px; font-size: 18px; }
+    .qi { width: 50px; height: 32px; font-size: 14px; }
+    .pi { height: 32px; font-size: 14px; }
+    .doc-tbl td { padding: 10px 8px; font-size: 13px; }
+
+    /* Footer documento */
+    .dx-footer { flex-direction: column; gap: 8px; }
+    .dx-footer .btn-verde { width: 100%; height: 44px; font-size: 15px; justify-content: center; }
+    .note-box { min-width: 0; width: 100%; }
   }
 </style>
 </head>
@@ -321,6 +390,27 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- TAB BAR MOBILE -->
+<div class="tab-bar" style="display:none" id="tabBar">
+  <button class="tab-item attivo" id="tabCerca" onclick="mostraSchermata('cerca')">
+    <span class="tab-icon">🔍</span>
+    <span>Cerca</span>
+  </button>
+  <button class="tab-item" id="tabDoc" onclick="mostraSchermata('doc')">
+    <span class="tab-icon">📋</span>
+    <span>Documento</span>
+    <span class="tab-badge" id="tabBadge">0</span>
+  </button>
+  <button class="tab-item" id="tabClienti" onclick="apriClienti()">
+    <span class="tab-icon">👤</span>
+    <span>Clienti</span>
+  </button>
+  <button class="tab-item" id="tabPDF" onclick="esportaPDF()">
+    <span class="tab-icon">📄</span>
+    <span>PDF</span>
+  </button>
+</div>
+
 <script>
 const stato = { righe:[], cliente:null, tipo:"Preventivo", numero:"", note:"" };
 let _clienti = [], _idxCli = -1, _dbTimer = null, _voci = [];
@@ -390,6 +480,8 @@ function aggiungi(i) {
     um: v.um||"cad", quantita: 1, prezzo_unitario: v.prezzo||0
   });
   renderDoc();
+  aggiornaBadge();
+  if(isMobile()) mostraSchermata('doc');
   toast("✓ Aggiunto");
 }
 
@@ -428,6 +520,7 @@ function renderDoc() {
       <td><button class="btn-del" onclick="delRiga(${i})">✕</button></td>
     </tr>`).join("");
   aggiornaTot();
+  aggiornaBadge();
 }
 
 function dq(i,d){ stato.righe[i].quantita=Math.max(0,stato.righe[i].quantita+d); renderDoc(); }
@@ -597,6 +690,31 @@ async function salvaSett() {
     email:document.getElementById("sEmail").value.trim(),
   }});
   chiudiSett(); toast("✓ Salvato");
+}
+
+// ── MOBILE ───────────────────────────────────────────────────────
+function isMobile() { return window.innerWidth <= 700; }
+
+function mostraSchermata(quale) {
+  if (!isMobile()) return;
+  const layout = document.querySelector(".layout");
+  if (quale === "doc") {
+    layout.classList.add("mostra-doc");
+    document.getElementById("tabCerca").classList.remove("attivo");
+    document.getElementById("tabDoc").classList.add("attivo");
+  } else {
+    layout.classList.remove("mostra-doc");
+    document.getElementById("tabCerca").classList.add("attivo");
+    document.getElementById("tabDoc").classList.remove("attivo");
+  }
+}
+
+function aggiornaBadge() {
+  const n = stato.righe.length;
+  const badge = document.getElementById("tabBadge");
+  if (!badge) return;
+  badge.textContent = n;
+  badge.classList.toggle("visibile", n > 0);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
