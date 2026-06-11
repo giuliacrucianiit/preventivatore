@@ -153,7 +153,7 @@ def genera_pdf(doc: dict, impostazioni: dict) -> bytes:
     az = impostazioni.get("azienda", {})
     righe = doc.get("righe", [])
     cliente = doc.get("cliente", {})
-    tipo = doc.get("tipo", "Computo").upper()
+    tipo = doc.get("tipo", "Computo").replace("Preventivo","Computo").upper()
     numero = doc.get("numero", "")
     note = doc.get("note", "")
     totale = sum(r["quantita"] * r["prezzo_unitario"] for r in righe)
@@ -253,7 +253,7 @@ def genera_excel(doc: dict, impostazioni: dict) -> bytes:
     az = impostazioni.get("azienda", {})
     righe = doc.get("righe", [])
     cliente = doc.get("cliente", {})
-    tipo = doc.get("tipo", "Computo")
+    tipo = doc.get("tipo", "Computo").replace("Preventivo","Computo")
     numero = doc.get("numero", "")
     note = doc.get("note", "")
 
@@ -321,11 +321,21 @@ def genera_excel(doc: dict, impostazioni: dict) -> bytes:
     # Righe dati
     totale = 0.0
     for idx, r in enumerate(righe):
-        tot = r["quantita"] * r["prezzo_unitario"]
+        prezzo_u = r["prezzo_unitario"]
+        qnt = r["quantita"]
+        tot = qnt * prezzo_u
+        ha_prezzo = prezzo_u > 0
         totale += tot
         fill = PatternFill("solid", fgColor="F8F8F8") if idx % 2 == 0 else PatternFill("solid", fgColor="FFFFFF")
-        valori = [r.get("codice",""), r.get("descrizione",""), r.get("um",""),
-                  r["quantita"], r["prezzo_unitario"], tot]
+        # Se non ha prezzo, lascia vuote quantità, prezzo, importo
+        valori = [
+            r.get("codice",""),
+            r.get("descrizione",""),
+            r.get("um","") if ha_prezzo else "",
+            qnt if ha_prezzo else "",
+            prezzo_u if ha_prezzo else "",
+            tot if ha_prezzo else "",
+        ]
         allineamenti = ["left","left","center","right","right","right"]
         for ci, (val, al) in enumerate(zip(valori, allineamenti), 1):
             c = ws.cell(row, ci, val)
@@ -333,9 +343,10 @@ def genera_excel(doc: dict, impostazioni: dict) -> bytes:
             c.fill = fill
             c.alignment = Alignment(horizontal=al, vertical="top", wrap_text=ci==2)
             c.border = bordo_cell
-            # Formato numerico per prezzi
-            if ci in (4, 5, 6):
-                c.number_format = '#.##0,00 €' if ci > 4 else '#.##0,##'
+            if ci in (5, 6) and ha_prezzo:
+                c.number_format = '#,##0.00 €'
+            if ci == 4 and ha_prezzo:
+                c.number_format = '#,##0.##'
         ws.row_dimensions[row].height = 30
         row += 1
 
@@ -346,7 +357,7 @@ def genera_excel(doc: dict, impostazioni: dict) -> bytes:
     c_tot_label.alignment = Alignment(horizontal="right")
     c_tot_val = ws.cell(row, 6, totale)
     c_tot_val.font = bold(12)
-    c_tot_val.number_format = '#.##0,00 €'
+    c_tot_val.number_format = '#,##0.00 €'
     c_tot_val.alignment = Alignment(horizontal="right")
     c_tot_val.fill = PatternFill("solid", fgColor=grigio)
 
