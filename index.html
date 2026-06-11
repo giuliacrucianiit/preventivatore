@@ -255,13 +255,7 @@
   <button class="btn btn-blu" onclick="apriClienti()">👤 Clienti</button>
   <div class="sp"></div>
   <button class="btn btn-ghost" onclick="nuovoDoc()">＋ Nuovo</button>
-  <div style="position:relative;display:inline-block" id="menuScarica">
-    <button class="btn btn-verde" onclick="toggleMenuScarica()">⬇ Scarica ▾</button>
-    <div id="dropScarica" style="display:none;position:absolute;right:0;top:38px;background:white;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:200;min-width:140px;">
-      <div onclick="esportaPDF();chiudiMenuScarica()" style="padding:10px 16px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">📄 PDF</div>
-      <div onclick="esportaExcel();chiudiMenuScarica()" style="padding:10px 16px;cursor:pointer;font-size:13px;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">📊 Excel</div>
-    </div>
-  </div>
+
   <button class="btn btn-ghost" style="width:34px;padding:0" onclick="apriSett()">⚙</button>
 </div>
 
@@ -338,7 +332,13 @@
       </div>
       <div class="azioni">
         <button class="btn btn-ghost" style="color:#e57373;font-size:12px" onclick="svuota()">🗑 Svuota</button>
-        <button class="btn btn-verde" onclick="toggleMenuScarica()">⬇ Scarica</button>
+        <div style="position:relative;display:inline-block" id="menuScarica">
+          <button class="btn btn-verde" onclick="toggleMenuScarica()">Scarica ▾</button>
+          <div id="dropScarica" style="display:none;position:absolute;right:0;bottom:44px;background:white;border:1px solid #ddd;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:200;min-width:130px;">
+            <div onclick="esportaPDF();chiudiMenuScarica()" style="padding:10px 16px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">PDF</div>
+            <div onclick="esportaExcel();chiudiMenuScarica()" style="padding:10px 16px;cursor:pointer;font-size:13px;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">Excel</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -411,8 +411,8 @@
     <span class="tab-icon">👤</span>
     <span>Clienti</span>
   </button>
-  <button class="tab-item" id="tabPDF" onclick="toggleMenuScarica()">
-    <span class="tab-icon">⬇</span>
+  <button class="tab-item" id="tabPDF" onclick="esportaPDF()">
+    <span class="tab-icon">PDF</span>
     <span>Scarica</span>
   </button>
 </div>
@@ -469,12 +469,12 @@ function renderPrezziario(voci, q) {
     return;
   }
   tbody.innerHTML = voci.map((v,i) => `
-    <tr ondblclick="${v.ha_prezzo ? 'aggiungi('+i+')' : ''}">
+    <tr ondblclick="aggiungi(${i})">
       <td class="cod">${v.codice||""}</td>
       <td class="desc">${v.descrizione||""}</td>
       <td class="um">${v.um||""}</td>
       <td class="pr">${v.prezzo>0 ? fmtEU(v.prezzo) : ""}</td>
-      <td class="az">${v.ha_prezzo ? '<button class="btn-add" onclick="aggiungi('+i+')">+ Aggiungi</button>' : ''}</td>
+      <td class="az"><button class="btn-add" onclick="aggiungi(${i})">+ Aggiungi</button></td>
     </tr>`).join("");
 }
 

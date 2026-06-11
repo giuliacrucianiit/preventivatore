@@ -44,11 +44,18 @@ def _parse_prezzo(v) -> float:
     except: return 0.0
 
 def _leggi_foglio(ws, nome_sorgente: str, nome_foglio: str) -> list[dict]:
-    # Colonne fisse: A=0 codice, B=1 descrizione, C=2 um, D=3 prezzo
     col = {"codice": 0, "descrizione": 1, "um": 2, "prezzo": 3}
     skip_desc = {"descrizione dell'articolo","descrizione","voce","lavorazione"}
     skip_cod  = {"numero d'ordine","codice","cod.","n.","numero"}
     voci = []
+    # Tiene traccia del parent corrente per ogni livello gerarchico
+    # Il livello è determinato dal numero di punti nel codice
+    # es. "13.17" = livello 2, "13.17.10" = livello 3, "13.17.10.1" = livello 4
+    parent_desc = {}  # {livello: descrizione}
+
+    def livello(codice):
+        if not codice: return 0
+        return codice.count(".") + 1
 
     for row in ws.iter_rows(values_only=True):
         if not row or all(v is None for v in row): continue
@@ -64,12 +71,30 @@ def _leggi_foglio(ws, nome_sorgente: str, nome_foglio: str) -> list[dict]:
         if codice.lower() in skip_cod: continue
         if not desc: continue
 
+        lv = livello(codice)
+        ha_prezzo = prezzo > 0
+
+        # Aggiorna il parent per questo livello
+        if not ha_prezzo and codice:
+            parent_desc[lv] = desc
+            # Rimuovi livelli figli quando cambia il parent
+            for k in list(parent_desc.keys()):
+                if k > lv:
+                    del parent_desc[k]
+
+        # Costruisci descrizione per la ricerca concatenando tutti i parent
+        desc_ricerca = desc
+        for l in sorted(parent_desc.keys()):
+            if l < lv:
+                desc_ricerca = parent_desc[l] + " " + desc_ricerca
+
         voci.append({
             "codice": codice,
             "descrizione": desc,
+            "desc_ricerca": desc_ricerca,  # usata solo per la ricerca
             "prezzo": prezzo,
             "um": um,
-            "ha_prezzo": prezzo > 0,
+            "ha_prezzo": ha_prezzo,
             "sorgente": nome_sorgente,
             "foglio": nome_foglio,
         })
@@ -353,7 +378,7 @@ def api_prezziario():
     if q:
         tokens = q.split()
         voci = [v for v in voci
-                if all(t in f"{v['codice']} {v['descrizione']}".lower() for t in tokens)
+                if all(t in f"{v['codice']} {v.get('desc_ricerca', v['descrizione'])}".lower() for t in tokens)
                 and (not sorgente or v.get("sorgente") == sorgente)]
     elif sorgente:
         voci = [v for v in voci if v.get("sorgente") == sorgente]
@@ -398,7 +423,7 @@ def api_pdf():
         pdf_bytes = genera_pdf(request.json, leggi_impostazioni())
         return send_file(io.BytesIO(pdf_bytes), mimetype="application/pdf",
                          as_attachment=True,
-                         download_name=f"computo_{date.today().strftime('%Y%m%d')}.pdf")
+                         download_name=f"Computo_{date.today().strftime('%Y%m%d')}.pdf")
     except Exception as e:
         return jsonify({"errore": str(e)}), 500
 
@@ -409,7 +434,7 @@ def api_excel():
         return send_file(io.BytesIO(xlsx_bytes),
                          mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                          as_attachment=True,
-                         download_name=f"computo_{date.today().strftime('%Y%m%d')}.xlsx")
+                         download_name=f"Computo_{date.today().strftime('%Y%m%d')}.xlsx")
     except Exception as e:
         return jsonify({"errore": str(e)}), 500
 
